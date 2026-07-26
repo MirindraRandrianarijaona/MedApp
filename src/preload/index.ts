@@ -55,6 +55,15 @@ interface LigneInput {
   dureeTraitement?: string
 }
 
+interface RendezVousInput {
+  idPatient?: number
+  nomPatientTemporaire?: string
+  telephoneTemporaire?: string
+  dateRdv: string
+  heureDebut: string
+  motif?: string
+}
+
 // Custom APIs for renderer
 const api = {
   auth: {
@@ -105,6 +114,16 @@ const api = {
       ipcRenderer.invoke('documents:ouvrirPDF', base64, nomFichier),
     enregistrer: (idConsultation: number, typeDocument: string, cheminFichier: string) =>
       ipcRenderer.invoke('documents:enregistrer', idConsultation, typeDocument, cheminFichier)
+  },
+  rendezvous: {
+    creer: (data: RendezVousInput) => ipcRenderer.invoke('rendezvous:creer', data),
+    listerParJour: (date: string) => ipcRenderer.invoke('rendezvous:listerParJour', date),
+    listerParPeriode: (dateDebut: string, dateFin: string) =>
+      ipcRenderer.invoke('rendezvous:listerParPeriode', dateDebut, dateFin),
+    listerAvenir: () => ipcRenderer.invoke('rendezvous:listerAvenir'),
+    modifierStatut: (idRdv: number, statut: string) =>
+      ipcRenderer.invoke('rendezvous:modifierStatut', idRdv, statut),
+    supprimer: (idRdv: number) => ipcRenderer.invoke('rendezvous:supprimer', idRdv)
   }
 }
 

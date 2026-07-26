@@ -8,6 +8,7 @@ import { PatientDetailPage } from './pages/Patients/PatientDetailPage'
 import { ConsultationFormPage } from './pages/Consultations/ConsultationFormPage'
 import { ConsultationDetailPage } from './pages/Consultations/ConsultationDetailPage'
 import { OrdonnanceFormPage } from './pages/Ordonnances/OrdonnanceFormPage'
+import { RendezVousPage } from './pages/RendezVous/RendezVousPage'
 
 function App(): React.JSX.Element {
   return (
@@ -23,6 +24,7 @@ function App(): React.JSX.Element {
             <Route path="patients/:id/consultations/nouveau" element={<ConsultationFormPage />} />
             <Route path="patients/:id/consultations/:consultId" element={<ConsultationDetailPage />} />
             <Route path="patients/:id/consultations/:consultId/ordonnance" element={<OrdonnanceFormPage />} />
+            <Route path="rendez-vous" element={<RendezVousPage />} />
           </Route>
         </Routes>
       </HashRouter>

@@ -130,6 +130,27 @@ interface Ordonnance {
   notes: string | null
   lignes: LigneOrdonnance[]
 }
+interface RendezVousInput {
+  idPatient?: number
+  nomPatientTemporaire?: string
+  telephoneTemporaire?: string
+  dateRdv: string
+  heureDebut: string
+  motif?: string
+}
+
+interface RendezVous {
+  id: number
+  idPatient: number | null
+  nomPatientTemporaire: string | null
+  telephoneTemporaire: string | null
+  dateRdv: string
+  heureDebut: string
+  motif: string | null
+  statut: 'PREVU' | 'EFFECTUE' | 'ANNULE'
+  patientNom: string | null
+  patientPrenom: string | null
+}
 
 interface API {
   auth: {
@@ -173,6 +194,14 @@ interface API {
       typeDocument: string,
       cheminFichier: string
     ) => Promise<boolean>
+  }
+  rendezvous: {
+    creer: (data: RendezVousInput) => Promise<RendezVous>
+    listerParJour: (date: string) => Promise<RendezVous[]>
+    listerParPeriode: (dateDebut: string, dateFin: string) => Promise<RendezVous[]>
+    listerAvenir: () => Promise<RendezVous[]>
+    modifierStatut: (idRdv: number, statut: string) => Promise<boolean>
+    supprimer: (idRdv: number) => Promise<boolean>
   }
 }
 

@@ -91,4 +91,17 @@ CREATE TABLE IF NOT EXISTS ordonnance (
   dateOrdonnance TEXT NOT NULL DEFAULT (datetime('now')),
   notes TEXT
 );
+
+CREATE TABLE IF NOT EXISTS rendezVous (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  idPatient INTEGER REFERENCES patient(id) ON DELETE SET NULL,
+  nomPatientTemporaire TEXT,
+  telephoneTemporaire TEXT,
+  dateRdv TEXT NOT NULL,
+  heureDebut TEXT NOT NULL,
+  motif TEXT,
+  statut TEXT NOT NULL DEFAULT 'PREVU' CHECK (statut IN ('PREVU','EFFECTUE','ANNULE')),
+  CHECK (idPatient IS NOT NULL OR nomPatientTemporaire IS NOT NULL)
+);
+CREATE INDEX IF NOT EXISTS idx_rdv_date ON rendezVous(dateRdv);
 `
