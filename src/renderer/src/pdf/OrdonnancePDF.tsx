@@ -13,6 +13,7 @@ interface Props {
     consultation: { motif: string; diagnostic: string | null }
     dateOrdonnance: string
     notes: string | null
+    prochainRdv: { dateRdv: string; heureDebut: string } | null
     lignes: {
         nomCommercial: string
         dosageDisponible: string | null
@@ -41,7 +42,11 @@ const styles = StyleSheet.create({
     date: { fontSize: 9, color: '#5B6472', marginBottom: 6 },
     patientNom: { fontSize: 12, fontFamily: 'Helvetica-Bold' },
     patientAge: { fontSize: 9, color: '#5B6472', marginTop: 2 },
-    motifBloc: { marginBottom: 20, backgroundColor: '#F7F4EC', padding: 10, borderRadius: 4 },
+    motifRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+    motifBloc: { flex: 1, backgroundColor: '#F7F4EC', padding: 10, borderRadius: 4 },
+    rdvBloc: { width: 140, backgroundColor: '#F7F4EC', padding: 10, borderRadius: 4 },
+    rdvDate: { fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#161E2E' },
+    rdvHeure: { fontSize: 9, color: '#5B6472', marginTop: 2 },
     motifLabel: { fontSize: 8, color: '#5B6472', textTransform: 'uppercase', marginBottom: 2 },
     motifTexte: { fontSize: 10, color: '#161E2E' },
     ligne: { marginBottom: 14 },
@@ -65,7 +70,7 @@ const styles = StyleSheet.create({
     }
 })
 
-export function OrdonnancePDF({ medecin, patient, consultation, dateOrdonnance, notes, lignes }: Props): React.JSX.Element {
+export function OrdonnancePDF({ medecin, patient, consultation, dateOrdonnance, notes, prochainRdv, lignes }: Props): React.JSX.Element {
     return (
         <Document>
             <Page size="A5" style={styles.page}>
@@ -87,17 +92,28 @@ export function OrdonnancePDF({ medecin, patient, consultation, dateOrdonnance, 
                     </View>
                 </View>
 
-                <View style={styles.motifBloc}>
-                    <Text style={styles.motifLabel}>Motif de consultation</Text>
-                    <Text style={styles.motifTexte}>{consultation.motif}</Text>
-                    {consultation.diagnostic && (
-                        <>
-                            <Text style={[styles.motifLabel, { marginTop: 6 }]}>Diagnostic</Text>
-                            <Text style={styles.motifTexte}>{consultation.diagnostic}</Text>
-                        </>
+                <View style={styles.motifRow}>
+                    <View style={styles.motifBloc}>
+                        <Text style={styles.motifLabel}>Motif de consultation</Text>
+                        <Text style={styles.motifTexte}>{consultation.motif}</Text>
+                        {consultation.diagnostic && (
+                            <>
+                                <Text style={[styles.motifLabel, { marginTop: 6 }]}>Diagnostic</Text>
+                                <Text style={styles.motifTexte}>{consultation.diagnostic}</Text>
+                            </>
+                        )}
+                    </View>
+
+                    {prochainRdv && (
+                        <View style={styles.rdvBloc}>
+                            <Text style={styles.motifLabel}>Prochain rendez-vous</Text>
+                            <Text style={styles.rdvDate}>
+                                {new Date(prochainRdv.dateRdv).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </Text>
+                            <Text style={styles.rdvHeure}>{prochainRdv.heureDebut}</Text>
+                        </View>
                     )}
                 </View>
-
                 {lignes.map((l, i) => (
                     <View key={i} style={styles.ligne}>
                         <Text style={styles.medicamentNom}>

@@ -40,6 +40,11 @@ export function OrdonnanceFormPage(): React.JSX.Element {
     const [consultation, setConsultation] = useState<{ motif: string; diagnostic: string | null } | null>(null)
     const [notes, setNotes] = useState('')
 
+    const [prochainRdv, setProchainRdv] = useState<{ dateRdv: string; heureDebut: string } | null>(null)
+    const [formRdvOuvert, setFormRdvOuvert] = useState(false)
+    const [dateRdv, setDateRdv] = useState('')
+    const [heureRdv, setHeureRdv] = useState('09:00')
+
     useEffect(() => {
         window.api.ordonnances.get(Number(consultId)).then((o) => {
             setIdOrdonnance(o.id)
@@ -50,6 +55,9 @@ export function OrdonnanceFormPage(): React.JSX.Element {
     useEffect(() => {
         window.api.consultations.get(Number(consultId)).then((c) => setConsultation(c))
     }, [consultId])
+    useEffect(() => {
+        window.api.rendezvous.prochainPourPatient(Number(id)).then((r) => setProchainRdv(r ?? null))
+    }, [id])
 
     useEffect(() => {
         window.api.ordonnances.get(Number(consultId)).then((o) => {
@@ -59,6 +67,18 @@ export function OrdonnanceFormPage(): React.JSX.Element {
             setLignes(o.lignes)
         })
     }, [consultId])
+
+    async function handlePlanifierRdv(e: React.FormEvent): Promise<void> {
+        e.preventDefault()
+        await window.api.rendezvous.creer({
+            idPatient: Number(id),
+            dateRdv,
+            heureDebut: heureRdv,
+            motif: 'Suivi ordonnance'
+        })
+        setProchainRdv({ dateRdv, heureDebut: heureRdv })
+        setFormRdvOuvert(false)
+    }
 
     async function handleAjouterLigne(e: React.FormEvent): Promise<void> {
         e.preventDefault()
@@ -100,6 +120,7 @@ export function OrdonnanceFormPage(): React.JSX.Element {
                     consultation={consultation}
                     dateOrdonnance={dateOrdonnance}
                     notes={notes || null}
+                    prochainRdv={prochainRdv}
                     lignes={lignes}
                 />
             ).toBlob()
@@ -197,7 +218,7 @@ export function OrdonnanceFormPage(): React.JSX.Element {
                     Ajouter à l'ordonnance
                 </button>
             </form>
-            <div className="bg-white rounded-lg border border-slate/15 p-4 mb-6">
+            <div className="bg-white rounded-lg border border-slate/15 p-4 mb-6 mt-6">
                 <label className="font-mono text-xs uppercase tracking-wide text-slate">Notes (optionnel)</label>
                 <textarea
                     value={notes}
@@ -207,6 +228,35 @@ export function OrdonnanceFormPage(): React.JSX.Element {
                     rows={2}
                     className="w-full border border-slate/30 rounded-md px-3 py-2 text-sm mt-2 focus:outline-none focus:ring-2 focus:ring-brass"
                 />
+            </div>
+
+            <div className="bg-white rounded-lg border border-slate/15 p-4 mb-6">
+                <p className="font-mono text-xs uppercase tracking-wide text-slate mb-2">Rendez-vous de suivi (optionnel)</p>
+
+                {prochainRdv && !formRdvOuvert ? (
+                    <div className="flex items-center justify-between bg-brass/5 border border-brass/20 rounded-md px-3 py-2 text-sm">
+                        <span className="text-ink">
+                            {new Date(prochainRdv.dateRdv).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })} à {prochainRdv.heureDebut}
+                        </span>
+                        <button type="button" onClick={() => setFormRdvOuvert(true)} className="text-slate text-xs hover:underline">
+                            Changer
+                        </button>
+                    </div>
+                ) : formRdvOuvert ? (
+                    <form onSubmit={handlePlanifierRdv} className="flex gap-2 items-end">
+                        <input type="date" value={dateRdv} onChange={(e) => setDateRdv(e.target.value)} required
+                            className="border border-slate/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brass" />
+                        <input type="time" value={heureRdv} onChange={(e) => setHeureRdv(e.target.value)} required
+                            className="border border-slate/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brass" />
+                        <button type="submit" className="bg-ink text-paper px-4 py-2 rounded-md text-sm font-medium hover:bg-brass transition-colors">
+                            Planifier
+                        </button>
+                    </form>
+                ) : (
+                    <button type="button" onClick={() => setFormRdvOuvert(true)} className="text-brass text-sm font-medium hover:underline">
+                        + Planifier un rendez-vous de suivi
+                    </button>
+                )}
             </div>
         </div>
     )

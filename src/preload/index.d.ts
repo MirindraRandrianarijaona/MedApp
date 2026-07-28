@@ -202,6 +202,7 @@ interface API {
     listerAvenir: () => Promise<RendezVous[]>
     modifierStatut: (idRdv: number, statut: string) => Promise<boolean>
     supprimer: (idRdv: number) => Promise<boolean>
+    prochainPourPatient: (idPatient: number) => Promise<RendezVous | undefined>
   }
 }
 

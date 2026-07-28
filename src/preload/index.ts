@@ -123,6 +123,8 @@ const api = {
     listerAvenir: () => ipcRenderer.invoke('rendezvous:listerAvenir'),
     modifierStatut: (idRdv: number, statut: string) =>
       ipcRenderer.invoke('rendezvous:modifierStatut', idRdv, statut),
+    prochainPourPatient: (idPatient: number) =>
+      ipcRenderer.invoke('rendezvous:prochainPourPatient', idPatient),
     supprimer: (idRdv: number) => ipcRenderer.invoke('rendezvous:supprimer', idRdv)
   }
 }
