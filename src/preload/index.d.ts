@@ -174,6 +174,34 @@ interface DocumentClinique {
   dateEmission: string
 }
 
+interface PaiementInput {
+  montant: number
+  modePaiement?: string
+  statut?: 'PAYE' | 'EN_ATTENTE'
+}
+
+interface Paiement {
+  id: number
+  idConsultation: number
+  datePaiement: string
+  montant: number
+  modePaiement: string | null
+  statut: 'PAYE' | 'EN_ATTENTE'
+}
+
+interface PaiementEnAttente {
+  idConsultation: number
+  idPatient: number
+  dateConsultation: string
+  motif: string
+  patientNom: string
+  patientPrenom: string
+  idPaiement: number | null
+  montant: number | null
+  modePaiement: string | null
+  statut: string | null
+}
+
 interface API {
   auth: {
     verifierSession: () => Promise<Medecin | null>
@@ -229,6 +257,13 @@ interface API {
   documentsCliniques: {
     creer: (data: DocumentCliniqueInput) => Promise<DocumentClinique>
     listerParConsultation: (idConsultation: number) => Promise<DocumentClinique[]>
+  }
+  paiements: {
+    enregistrer: (idConsultation: number, data: PaiementInput) => Promise<Paiement>
+    get: (idConsultation: number) => Promise<Paiement | null>
+    modifierStatut: (idPaiement: number, statut: string) => Promise<boolean>
+    getRecettesPeriode: (dateDebut: string, dateFin: string) => Promise<number>
+    listerEnAttente: () => Promise<PaiementEnAttente[]>
   }
 }
 

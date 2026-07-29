@@ -76,6 +76,12 @@ interface DocumentCliniqueInput {
   contenu: string
 }
 
+interface PaiementInput {
+  montant: number
+  modePaiement?: string
+  statut?: 'PAYE' | 'EN_ATTENTE'
+}
+
 // Custom APIs for renderer
 const api = {
   auth: {
@@ -143,6 +149,16 @@ const api = {
     creer: (data: DocumentCliniqueInput) => ipcRenderer.invoke('documentsCliniques:creer', data),
     listerParConsultation: (idConsultation: number) =>
       ipcRenderer.invoke('documentsCliniques:listerParConsultation', idConsultation)
+  },
+  paiements: {
+    enregistrer: (idConsultation: number, data: PaiementInput) =>
+      ipcRenderer.invoke('paiements:enregistrer', idConsultation, data),
+    get: (idConsultation: number) => ipcRenderer.invoke('paiements:get', idConsultation),
+    modifierStatut: (idPaiement: number, statut: string) =>
+      ipcRenderer.invoke('paiements:modifierStatut', idPaiement, statut),
+    getRecettesPeriode: (dateDebut: string, dateFin: string) =>
+      ipcRenderer.invoke('paiements:getRecettesPeriode', dateDebut, dateFin),
+    listerEnAttente: () => ipcRenderer.invoke('paiements:listerEnAttente')
   }
 }
 

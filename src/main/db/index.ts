@@ -4,10 +4,11 @@ import { join } from 'path'
 import { SCHEMA } from './schema'
 
 let db: Database.Database | null = null
+let cheminDb = ''
 
 export function initDatabase(): Database.Database {
-  const dbPath = join(app.getPath('userData'), 'medicapp.db')
-  db = new Database(dbPath)
+  cheminDb = join(app.getPath('userData'), 'medicapp.db')
+  db = new Database(cheminDb)
   db.pragma('journal_mode = WAL')
   db.pragma('foreign_keys = ON')
   db.exec(SCHEMA)
@@ -17,4 +18,13 @@ export function initDatabase(): Database.Database {
 export function getDatabase(): Database.Database {
   if (!db) throw new Error('Database non initialisée — appelle initDatabase() au démarrage.')
   return db
+}
+
+export function getDbPath(): string {
+  return cheminDb
+}
+
+export function closeDatabase(): void {
+  db?.close()
+  db = null
 }

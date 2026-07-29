@@ -115,4 +115,13 @@ CREATE TABLE IF NOT EXISTS documentClinique (
   contenu TEXT NOT NULL,
   dateEmission TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS paiement (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  idConsultation INTEGER NOT NULL UNIQUE REFERENCES consultation(id) ON DELETE CASCADE,
+  datePaiement TEXT NOT NULL DEFAULT (datetime('now')),
+  montant REAL NOT NULL,
+  modePaiement TEXT,
+  statut TEXT NOT NULL DEFAULT 'EN_ATTENTE' CHECK (statut IN ('PAYE','EN_ATTENTE'))
+);
 `
