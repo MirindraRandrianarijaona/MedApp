@@ -151,6 +151,28 @@ interface RendezVous {
   patientNom: string | null
   patientPrenom: string | null
 }
+type TypeDocumentClinique =
+  'CERTIFICAT_APTITUDE' | 'ARRET_TRAVAIL' | 'CERTIFICAT_HOSPITALISATION' | 'DEMANDE_EXAMEN'
+
+interface DocumentCliniqueInput {
+  idConsultation: number
+  typeDocument: TypeDocumentClinique
+  dateDebut?: string
+  dateFin?: string
+  etablissement?: string
+  contenu: string
+}
+
+interface DocumentClinique {
+  id: number
+  idConsultation: number
+  typeDocument: TypeDocumentClinique
+  dateDebut: string | null
+  dateFin: string | null
+  etablissement: string | null
+  contenu: string
+  dateEmission: string
+}
 
 interface API {
   auth: {
@@ -203,6 +225,10 @@ interface API {
     modifierStatut: (idRdv: number, statut: string) => Promise<boolean>
     supprimer: (idRdv: number) => Promise<boolean>
     prochainPourPatient: (idPatient: number) => Promise<RendezVous | undefined>
+  }
+  documentsCliniques: {
+    creer: (data: DocumentCliniqueInput) => Promise<DocumentClinique>
+    listerParConsultation: (idConsultation: number) => Promise<DocumentClinique[]>
   }
 }
 

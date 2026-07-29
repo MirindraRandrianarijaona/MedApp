@@ -64,6 +64,18 @@ interface RendezVousInput {
   motif?: string
 }
 
+type TypeDocumentClinique =
+  'CERTIFICAT_APTITUDE' | 'ARRET_TRAVAIL' | 'CERTIFICAT_HOSPITALISATION' | 'DEMANDE_EXAMEN'
+
+interface DocumentCliniqueInput {
+  idConsultation: number
+  typeDocument: TypeDocumentClinique
+  dateDebut?: string
+  dateFin?: string
+  etablissement?: string
+  contenu: string
+}
+
 // Custom APIs for renderer
 const api = {
   auth: {
@@ -126,6 +138,11 @@ const api = {
     prochainPourPatient: (idPatient: number) =>
       ipcRenderer.invoke('rendezvous:prochainPourPatient', idPatient),
     supprimer: (idRdv: number) => ipcRenderer.invoke('rendezvous:supprimer', idRdv)
+  },
+  documentsCliniques: {
+    creer: (data: DocumentCliniqueInput) => ipcRenderer.invoke('documentsCliniques:creer', data),
+    listerParConsultation: (idConsultation: number) =>
+      ipcRenderer.invoke('documentsCliniques:listerParConsultation', idConsultation)
   }
 }
 

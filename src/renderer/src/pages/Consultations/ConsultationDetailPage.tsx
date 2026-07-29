@@ -93,6 +93,12 @@ export function ConsultationDetailPage(): React.JSX.Element {
                 >
                     Ordonnance
                 </button>
+                <button
+                    onClick={() => navigate(`/patients/${consultation.idPatient}/consultations/${consultation.id}/documents`)}
+                    className="border border-slate/30 text-ink px-4 py-2 rounded-md text-sm hover:border-brass transition-colors ml-2"
+                >
+                    Certificats & documents
+                </button>
             </div>
             <div className="mt-6">
                 <p className="font-mono text-xs uppercase tracking-wide text-slate mb-3">Compléments</p>

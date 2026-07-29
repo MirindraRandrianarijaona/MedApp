@@ -21,6 +21,13 @@ interface Props {
         momentPrise: string | null
         dureeTraitement: string | null
     }[]
+    signatureZone: { marginTop: 60, alignItems: 'flex-end' },
+    signatureLigne: { fontSize: 9, color: '#5B6472', marginBottom: 30 },
+    signatureLabel: { fontSize: 8, color: '#5B6472', borderTopWidth: 1, borderTopColor: '#CCCCCC', borderTopStyle: 'solid', paddingTop: 4, width: 180, textAlign: 'center' },
+    footer: {
+        position: 'absolute', bottom: 30, left: 40, right: 40, fontSize: 8, color: '#5B6472', textAlign: 'center',
+        borderTopWidth: 1, borderTopColor: '#CCCCCC', borderTopStyle: 'solid', paddingTop: 8
+    }
 }
 
 const styles = StyleSheet.create({
@@ -131,6 +138,12 @@ export function OrdonnancePDF({ medecin, patient, consultation, dateOrdonnance, 
                         <Text style={styles.notesTexte}>{notes}</Text>
                     </View>
                 )}
+                <View style={styles.signatureZone}>
+                    <Text style={styles.signatureLigne}>
+                        Fait le {new Date(dateEmission).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </Text>
+                    <Text style={styles.signatureLabel}>Signature et cachet du médecin</Text>
+                </View>
 
                 <Text style={styles.footer}>Document généré par MedApp — usage médical uniquement</Text>
             </Page>

@@ -9,6 +9,7 @@ import { registerConsultationsHandlers } from './ipc/consultations'
 import { registerOrdonnancesHandlers } from './ipc/ordonnances'
 import { registerDocumentsHandlers } from './ipc/documents'
 import { registerRendezVousHandlers } from './ipc/rendezvous'
+import { registerDocumentsCliniquesHandlers } from './ipc/documentsCliniques'
 
 function createWindow(): void {
   // Create the browser window.
@@ -68,6 +69,7 @@ app.whenReady().then(() => {
   registerOrdonnancesHandlers()
   registerDocumentsHandlers()
   registerRendezVousHandlers()
+  registerDocumentsCliniquesHandlers()
   createWindow()
 
   app.on('activate', function () {
