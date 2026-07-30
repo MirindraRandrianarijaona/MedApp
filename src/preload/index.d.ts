@@ -265,6 +265,10 @@ interface API {
     getRecettesPeriode: (dateDebut: string, dateFin: string) => Promise<number>
     listerEnAttente: () => Promise<PaiementEnAttente[]>
   }
+  backup: {
+    exporter: () => Promise<string | null>
+    restaurer: () => Promise<boolean>
+  }
 }
 
 declare global {

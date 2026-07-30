@@ -11,6 +11,7 @@ import { OrdonnanceFormPage } from './pages/Ordonnances/OrdonnanceFormPage'
 import { RendezVousPage } from './pages/RendezVous/RendezVousPage'
 import { DocumentCliniqueFormPage } from './pages/Documents/DocumentCliniqueFormPage'
 import { FinancePage } from './pages/Finance/FinancePage'
+import { ParametresPage } from './pages/Parametres/ParametresPage'
 
 function App(): React.JSX.Element {
   return (
@@ -29,6 +30,7 @@ function App(): React.JSX.Element {
             <Route path="rendez-vous" element={<RendezVousPage />} />
             <Route path="patients/:id/consultations/:consultId/documents" element={<DocumentCliniqueFormPage />} />
             <Route path="finance" element={<FinancePage />} />
+            <Route path="parametres" element={<ParametresPage />} />
           </Route>
         </Routes>
       </HashRouter>

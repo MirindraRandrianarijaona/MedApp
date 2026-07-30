@@ -159,6 +159,10 @@ const api = {
     getRecettesPeriode: (dateDebut: string, dateFin: string) =>
       ipcRenderer.invoke('paiements:getRecettesPeriode', dateDebut, dateFin),
     listerEnAttente: () => ipcRenderer.invoke('paiements:listerEnAttente')
+  },
+  backup: {
+    exporter: () => ipcRenderer.invoke('backup:exporter'),
+    restaurer: () => ipcRenderer.invoke('backup:restaurer')
   }
 }
 
