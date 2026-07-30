@@ -14,6 +14,16 @@ interface AuthContextValue {
     isAuthenticated: boolean
     loading: boolean
     setAuthenticated: (medecin: Medecin) => void
+    updateMedecin: (medecin: Medecin) => void
+}
+
+interface AuthContextValue {
+    medecin: Medecin | null
+    isAuthenticated: boolean
+    loading: boolean
+    setAuthenticated: (medecin: Medecin) => void
+    updateMedecin: (medecin: Medecin) => void
+    logout: () => void
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -34,9 +44,15 @@ export function AuthProvider({ children }: { children: ReactNode }): React.JSX.E
         setMedecin(profil)
         setIsAuthenticated(true)
     }
+    function updateMedecin(profil: Medecin): void {
+        setMedecin(profil)
+    }
+    function logout(): void {
+        setIsAuthenticated(false)
+    }
 
     return (
-        <AuthContext.Provider value={{ medecin, isAuthenticated, loading, setAuthenticated }}>
+        <AuthContext.Provider value={{ medecin, isAuthenticated, loading, setAuthenticated, updateMedecin, logout }}>
             {children}
         </AuthContext.Provider>
     )

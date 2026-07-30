@@ -3,16 +3,23 @@ import { join } from 'path'
 import { writeFileSync, existsSync, mkdirSync } from 'fs'
 import { getDatabase } from '../db'
 
+function nettoyer(texte: string): string {
+  return texte.replace(/[\\/:*?"<>|]/g, '_').trim()
+}
+
 export function registerDocumentsHandlers(): void {
-  ipcMain.handle('documents:ouvrirPDF', async (_event, base64: string, nomFichier: string) => {
-    const buffer = Buffer.from(base64, 'base64')
-    const dossierDocs = join(app.getPath('userData'), 'documents')
-    if (!existsSync(dossierDocs)) mkdirSync(dossierDocs, { recursive: true })
-    const chemin = join(dossierDocs, nomFichier)
-    writeFileSync(chemin, buffer)
-    await shell.openPath(chemin)
-    return chemin
-  })
+  ipcMain.handle(
+    'documents:ouvrirPDF',
+    async (_event, base64: string, nomFichier: string, dossierPatient: string) => {
+      const buffer = Buffer.from(base64, 'base64')
+      const dossierComplet = join(app.getPath('userData'), 'documents', nettoyer(dossierPatient))
+      if (!existsSync(dossierComplet)) mkdirSync(dossierComplet, { recursive: true })
+      const chemin = join(dossierComplet, nettoyer(nomFichier))
+      writeFileSync(chemin, buffer)
+      await shell.openPath(chemin)
+      return chemin
+    }
+  )
 
   ipcMain.handle(
     'documents:enregistrer',

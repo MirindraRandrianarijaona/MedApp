@@ -28,11 +28,30 @@ export function ConsultationDetailPage(): React.JSX.Element {
     const [consultation, setConsultation] = useState<Consultation | null>(null)
     const [complements, setComplements] = useState<Complement[]>([])
     const [nouveauComplement, setNouveauComplement] = useState('')
+    const [paiement, setPaiement] = useState<{ id: number; montant: number; modePaiement: string | null; statut: 'PAYE' | 'EN_ATTENTE' } | null>(null)
+    const [montant, setMontant] = useState('')
+    const [modePaiement, setModePaiement] = useState('Espèces')
 
     useEffect(() => {
         window.api.consultations.get(Number(consultId)).then(setConsultation)
         window.api.consultations.listerComplements(Number(consultId)).then(setComplements)
     }, [consultId])
+
+    useEffect(() => {
+        window.api.paiements.get(Number(consultId)).then((p) => {
+            setPaiement(p)
+            if (p) { setMontant(String(p.montant)); setModePaiement(p.modePaiement ?? 'Espèces') }
+        })
+    }, [consultId])
+
+    async function handleEnregistrerPaiement(statut: 'PAYE' | 'EN_ATTENTE'): Promise<void> {
+        const p = await window.api.paiements.enregistrer(Number(consultId), {
+            montant: Number(montant),
+            modePaiement,
+            statut
+        })
+        setPaiement(p)
+    }
 
     async function handleAjouterComplement(e: React.FormEvent): Promise<void> {
         e.preventDefault()
@@ -86,14 +105,55 @@ export function ConsultationDetailPage(): React.JSX.Element {
                         </div>
                     )}
             </div>
-            <div className="border-t border-slate/10 pt-4">
-                <button
-                    onClick={() => navigate(`/patients/${consultation.idPatient}/consultations/${consultation.id}/ordonnance`)}
-                    className="bg-ink text-paper px-4 py-2 rounded-md text-sm font-medium hover:bg-brass transition-colors"
-                >
-                    Ordonnance
-                </button>
+            <div className="bg-white rounded-lg border border-slate/15 p-4 mt-6">
+                <div className="flex items-center justify-between mb-3">
+                    <p className="font-mono text-xs uppercase tracking-wide text-slate">Paiement</p>
+                    {paiement && (
+                        <span className={`text-xs px-2 py-1 rounded-full ${paiement.statut === 'PAYE' ? 'bg-sage/10 text-sage' : 'bg-slate/10 text-slate'}`}>
+                            {paiement.statut === 'PAYE' ? 'Payé' : 'Non payé'}
+                        </span>
+                    )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                    <input
+                        type="number"
+                        placeholder="Montant"
+                        value={montant}
+                        onChange={(e) => setMontant(e.target.value)}
+                        min="0"
+                        step="1000"
+                        className="border border-slate/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brass"
+                    />
+                    <select
+                        value={modePaiement}
+                        onChange={(e) => setModePaiement(e.target.value)}
+                        className="border border-slate/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brass"
+                    >
+                        <option>Espèces</option>
+                        <option>Mobile Money</option>
+                        <option>Chèque</option>
+                    </select>
+                </div>
+
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => handleEnregistrerPaiement('PAYE')}
+                        disabled={!montant}
+                        className="bg-ink text-paper px-4 py-2 rounded-md text-sm font-medium hover:bg-brass transition-colors disabled:opacity-40"
+                    >
+                        Marquer payé
+                    </button>
+                    <button
+                        onClick={() => handleEnregistrerPaiement('EN_ATTENTE')}
+                        disabled={!montant}
+                        className="border border-slate/30 text-slate px-4 py-2 rounded-md text-sm hover:border-brass transition-colors disabled:opacity-40"
+                    >
+                        Enregistrer (non payé)
+                    </button>
+                </div>
             </div>
+
             <div className="mt-6">
                 <p className="font-mono text-xs uppercase tracking-wide text-slate mb-3">Compléments</p>
                 {complements.length === 0 ? (
@@ -122,6 +182,21 @@ export function ConsultationDetailPage(): React.JSX.Element {
                         Ajouter
                     </button>
                 </form>
+            </div>
+            <div className="border-t border-slate/10 pt-4">
+                <p className="font-mono text-xs uppercase tracking-wide text-slate mb-3">Générer</p>
+                <button
+                    onClick={() => navigate(`/patients/${consultation.idPatient}/consultations/${consultation.id}/ordonnance`)}
+                    className="bg-ink text-paper px-4 py-2 rounded-md text-sm font-medium hover:bg-brass transition-colors"
+                >
+                    Ordonnance
+                </button>
+                <button
+                    onClick={() => navigate(`/patients/${consultation.idPatient}/consultations/${consultation.id}/documents`)}
+                    className="border border-slate/30 text-ink px-4 py-2 rounded-md text-sm hover:border-brass transition-colors ml-2"
+                >
+                    Certificats & documents
+                </button>
             </div>
         </div>
     )

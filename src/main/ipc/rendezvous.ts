@@ -64,6 +64,16 @@ export function registerRendezVousHandlers(): void {
     return true
   })
 
+  ipcMain.handle('rendezvous:prochainPourPatient', (_event, idPatient: number) => {
+    const db = getDatabase()
+    return db
+      .prepare(
+        `${SELECT_JOINT} WHERE r.idPatient = ? AND r.dateRdv >= date('now') AND r.statut != 'ANNULE'
+       ORDER BY r.dateRdv ASC, r.heureDebut ASC LIMIT 1`
+      )
+      .get(idPatient)
+  })
+
   ipcMain.handle('rendezvous:supprimer', (_event, idRdv: number) => {
     const db = getDatabase()
     db.prepare('DELETE FROM rendezVous WHERE id = ?').run(idRdv)

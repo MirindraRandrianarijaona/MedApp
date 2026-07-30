@@ -95,7 +95,7 @@ export function RendezVousPage(): React.JSX.Element {
                     {rdvs.length === 0 ? (
                         <p className="text-slate text-sm">Aucun rendez-vous ce mois-ci.</p>
                     ) : (
-                        <div className="space-y-2 max-h-[480px] overflow-auto pr-1">
+                        <div className="space-y-2 max-h-120 overflow-auto pr-1">
                             {rdvs.map((r) => (
                                 <div
                                     key={r.id}

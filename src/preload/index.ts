@@ -64,6 +64,24 @@ interface RendezVousInput {
   motif?: string
 }
 
+type TypeDocumentClinique =
+  'CERTIFICAT_APTITUDE' | 'ARRET_TRAVAIL' | 'CERTIFICAT_HOSPITALISATION' | 'DEMANDE_EXAMEN'
+
+interface DocumentCliniqueInput {
+  idConsultation: number
+  typeDocument: TypeDocumentClinique
+  dateDebut?: string
+  dateFin?: string
+  etablissement?: string
+  contenu: string
+}
+
+interface PaiementInput {
+  montant: number
+  modePaiement?: string
+  statut?: 'PAYE' | 'EN_ATTENTE'
+}
+
 // Custom APIs for renderer
 const api = {
   auth: {
@@ -110,8 +128,8 @@ const api = {
     supprimerLigne: (idLigne: number) => ipcRenderer.invoke('ordonnances:supprimerLigne', idLigne)
   },
   documents: {
-    ouvrirPDF: (base64: string, nomFichier: string) =>
-      ipcRenderer.invoke('documents:ouvrirPDF', base64, nomFichier),
+    ouvrirPDF: (base64: string, nomFichier: string, dossierPatient: string) =>
+      ipcRenderer.invoke('documents:ouvrirPDF', base64, nomFichier, dossierPatient),
     enregistrer: (idConsultation: number, typeDocument: string, cheminFichier: string) =>
       ipcRenderer.invoke('documents:enregistrer', idConsultation, typeDocument, cheminFichier)
   },
@@ -123,7 +141,33 @@ const api = {
     listerAvenir: () => ipcRenderer.invoke('rendezvous:listerAvenir'),
     modifierStatut: (idRdv: number, statut: string) =>
       ipcRenderer.invoke('rendezvous:modifierStatut', idRdv, statut),
+    prochainPourPatient: (idPatient: number) =>
+      ipcRenderer.invoke('rendezvous:prochainPourPatient', idPatient),
     supprimer: (idRdv: number) => ipcRenderer.invoke('rendezvous:supprimer', idRdv)
+  },
+  documentsCliniques: {
+    creer: (data: DocumentCliniqueInput) => ipcRenderer.invoke('documentsCliniques:creer', data),
+    listerParConsultation: (idConsultation: number) =>
+      ipcRenderer.invoke('documentsCliniques:listerParConsultation', idConsultation)
+  },
+  paiements: {
+    enregistrer: (idConsultation: number, data: PaiementInput) =>
+      ipcRenderer.invoke('paiements:enregistrer', idConsultation, data),
+    get: (idConsultation: number) => ipcRenderer.invoke('paiements:get', idConsultation),
+    modifierStatut: (idPaiement: number, statut: string) =>
+      ipcRenderer.invoke('paiements:modifierStatut', idPaiement, statut),
+    getRecettesPeriode: (dateDebut: string, dateFin: string) =>
+      ipcRenderer.invoke('paiements:getRecettesPeriode', dateDebut, dateFin),
+    listerEnAttente: () => ipcRenderer.invoke('paiements:listerEnAttente')
+  },
+  backup: {
+    exporter: () => ipcRenderer.invoke('backup:exporter'),
+    restaurer: () => ipcRenderer.invoke('backup:restaurer')
+  },
+  coffre: {
+    etat: () => ipcRenderer.invoke('coffre:etat'),
+    creer: (motDePasse: string) => ipcRenderer.invoke('coffre:creer', motDePasse),
+    deverrouiller: (motDePasse: string) => ipcRenderer.invoke('coffre:deverrouiller', motDePasse)
   }
 }
 

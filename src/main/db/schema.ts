@@ -80,7 +80,7 @@ CREATE INDEX IF NOT EXISTS idx_ligne_ordonnance ON ligneOrdonnance(idOrdonnance)
 CREATE TABLE IF NOT EXISTS documentMedical (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   idConsultation INTEGER NOT NULL REFERENCES consultation(id) ON DELETE CASCADE,
-  typeDocument TEXT NOT NULL CHECK (typeDocument IN ('ORDONNANCE','FACTURE','CERTIFICAT_APTITUDE','ARRET_TRAVAIL')),
+  typeDocument TEXT NOT NULL CHECK (typeDocument IN ('ORDONNANCE','FACTURE','CERTIFICAT_APTITUDE','ARRET_TRAVAIL','CERTIFICAT_HOSPITALISATION','DEMANDE_EXAMEN')),
   dateGeneration TEXT NOT NULL DEFAULT (datetime('now')),
   cheminFichier TEXT
 );
@@ -104,4 +104,24 @@ CREATE TABLE IF NOT EXISTS rendezVous (
   CHECK (idPatient IS NOT NULL OR nomPatientTemporaire IS NOT NULL)
 );
 CREATE INDEX IF NOT EXISTS idx_rdv_date ON rendezVous(dateRdv);
+
+CREATE TABLE IF NOT EXISTS documentClinique (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  idConsultation INTEGER NOT NULL REFERENCES consultation(id) ON DELETE CASCADE,
+  typeDocument TEXT NOT NULL CHECK (typeDocument IN ('CERTIFICAT_APTITUDE','ARRET_TRAVAIL','CERTIFICAT_HOSPITALISATION','DEMANDE_EXAMEN')),
+  dateDebut TEXT,
+  dateFin TEXT,
+  etablissement TEXT,
+  contenu TEXT NOT NULL,
+  dateEmission TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS paiement (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  idConsultation INTEGER NOT NULL UNIQUE REFERENCES consultation(id) ON DELETE CASCADE,
+  datePaiement TEXT NOT NULL DEFAULT (datetime('now')),
+  montant REAL NOT NULL,
+  modePaiement TEXT,
+  statut TEXT NOT NULL DEFAULT 'EN_ATTENTE' CHECK (statut IN ('PAYE','EN_ATTENTE'))
+);
 `

@@ -151,6 +151,56 @@ interface RendezVous {
   patientNom: string | null
   patientPrenom: string | null
 }
+type TypeDocumentClinique =
+  'CERTIFICAT_APTITUDE' | 'ARRET_TRAVAIL' | 'CERTIFICAT_HOSPITALISATION' | 'DEMANDE_EXAMEN'
+
+interface DocumentCliniqueInput {
+  idConsultation: number
+  typeDocument: TypeDocumentClinique
+  dateDebut?: string
+  dateFin?: string
+  etablissement?: string
+  contenu: string
+}
+
+interface DocumentClinique {
+  id: number
+  idConsultation: number
+  typeDocument: TypeDocumentClinique
+  dateDebut: string | null
+  dateFin: string | null
+  etablissement: string | null
+  contenu: string
+  dateEmission: string
+}
+
+interface PaiementInput {
+  montant: number
+  modePaiement?: string
+  statut?: 'PAYE' | 'EN_ATTENTE'
+}
+
+interface Paiement {
+  id: number
+  idConsultation: number
+  datePaiement: string
+  montant: number
+  modePaiement: string | null
+  statut: 'PAYE' | 'EN_ATTENTE'
+}
+
+interface PaiementEnAttente {
+  idConsultation: number
+  idPatient: number
+  dateConsultation: string
+  motif: string
+  patientNom: string
+  patientPrenom: string
+  idPaiement: number | null
+  montant: number | null
+  modePaiement: string | null
+  statut: string | null
+}
 
 interface API {
   auth: {
@@ -188,7 +238,7 @@ interface API {
     supprimerLigne: (idLigne: number) => Promise<boolean>
   }
   documents: {
-    ouvrirPDF: (base64: string, nomFichier: string) => Promise<string>
+    ouvrirPDF: (base64: string, nomFichier: string, dossierPatient: string) => Promise<string>
     enregistrer: (
       idConsultation: number,
       typeDocument: string,
@@ -202,6 +252,27 @@ interface API {
     listerAvenir: () => Promise<RendezVous[]>
     modifierStatut: (idRdv: number, statut: string) => Promise<boolean>
     supprimer: (idRdv: number) => Promise<boolean>
+    prochainPourPatient: (idPatient: number) => Promise<RendezVous | undefined>
+  }
+  documentsCliniques: {
+    creer: (data: DocumentCliniqueInput) => Promise<DocumentClinique>
+    listerParConsultation: (idConsultation: number) => Promise<DocumentClinique[]>
+  }
+  paiements: {
+    enregistrer: (idConsultation: number, data: PaiementInput) => Promise<Paiement>
+    get: (idConsultation: number) => Promise<Paiement | null>
+    modifierStatut: (idPaiement: number, statut: string) => Promise<boolean>
+    getRecettesPeriode: (dateDebut: string, dateFin: string) => Promise<number>
+    listerEnAttente: () => Promise<PaiementEnAttente[]>
+  }
+  backup: {
+    exporter: () => Promise<string | null>
+    restaurer: () => Promise<boolean>
+  }
+  coffre: {
+    etat: () => Promise<{ existe: boolean }>
+    creer: (motDePasse: string) => Promise<boolean>
+    deverrouiller: (motDePasse: string) => Promise<boolean>
   }
 }
 
