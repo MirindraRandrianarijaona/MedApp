@@ -121,6 +121,8 @@ export function ConsultationDetailPage(): React.JSX.Element {
                         placeholder="Montant"
                         value={montant}
                         onChange={(e) => setMontant(e.target.value)}
+                        min="0"
+                        step="1000"
                         className="border border-slate/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brass"
                     />
                     <select
@@ -151,20 +153,7 @@ export function ConsultationDetailPage(): React.JSX.Element {
                     </button>
                 </div>
             </div>
-            <div className="border-t border-slate/10 pt-4">
-                <button
-                    onClick={() => navigate(`/patients/${consultation.idPatient}/consultations/${consultation.id}/ordonnance`)}
-                    className="bg-ink text-paper px-4 py-2 rounded-md text-sm font-medium hover:bg-brass transition-colors"
-                >
-                    Ordonnance
-                </button>
-                <button
-                    onClick={() => navigate(`/patients/${consultation.idPatient}/consultations/${consultation.id}/documents`)}
-                    className="border border-slate/30 text-ink px-4 py-2 rounded-md text-sm hover:border-brass transition-colors ml-2"
-                >
-                    Certificats & documents
-                </button>
-            </div>
+
             <div className="mt-6">
                 <p className="font-mono text-xs uppercase tracking-wide text-slate mb-3">Compléments</p>
                 {complements.length === 0 ? (
@@ -193,6 +182,21 @@ export function ConsultationDetailPage(): React.JSX.Element {
                         Ajouter
                     </button>
                 </form>
+            </div>
+            <div className="border-t border-slate/10 pt-4">
+                <p className="font-mono text-xs uppercase tracking-wide text-slate mb-3">Générer</p>
+                <button
+                    onClick={() => navigate(`/patients/${consultation.idPatient}/consultations/${consultation.id}/ordonnance`)}
+                    className="bg-ink text-paper px-4 py-2 rounded-md text-sm font-medium hover:bg-brass transition-colors"
+                >
+                    Ordonnance
+                </button>
+                <button
+                    onClick={() => navigate(`/patients/${consultation.idPatient}/consultations/${consultation.id}/documents`)}
+                    className="border border-slate/30 text-ink px-4 py-2 rounded-md text-sm hover:border-brass transition-colors ml-2"
+                >
+                    Certificats & documents
+                </button>
             </div>
         </div>
     )

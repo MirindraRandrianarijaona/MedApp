@@ -45,6 +45,7 @@ export function OrdonnanceFormPage(): React.JSX.Element {
     const [dateRdv, setDateRdv] = useState('')
     const [heureRdv, setHeureRdv] = useState('09:00')
 
+
     useEffect(() => {
         window.api.ordonnances.get(Number(consultId)).then((o) => {
             setIdOrdonnance(o.id)
@@ -133,7 +134,8 @@ export function OrdonnanceFormPage(): React.JSX.Element {
             })
 
             const nomFichier = `Ordonnance_${patient.nom}_${patient.prenom}_${dateOrdonnance.slice(0, 10)}.pdf`
-            const chemin = await window.api.documents.ouvrirPDF(base64, nomFichier)
+            const dossierPatient = `${patient.nom}_${patient.prenom}_${id}`
+            const chemin = await window.api.documents.ouvrirPDF(base64, nomFichier, dossierPatient)
             await window.api.documents.enregistrer(Number(consultId), 'ORDONNANCE', chemin)
         } finally {
             setGeneration(false)

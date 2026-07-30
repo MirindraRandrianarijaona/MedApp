@@ -87,7 +87,8 @@ export function DocumentCliniqueFormPage(): React.JSX.Element {
             })
 
             const nomFichier = `${ONGLETS.find((o) => o.type === typeActif)?.label.replace(/\s/g, '_')}_${patient.nom}_${dateEmission.slice(0, 10)}.pdf`
-            const chemin = await window.api.documents.ouvrirPDF(base64, nomFichier)
+            const dossierPatient = `${patient.nom}_${patient.prenom}_${id}`
+            const chemin = await window.api.documents.ouvrirPDF(base64, nomFichier, dossierPatient)
             await window.api.documents.enregistrer(Number(consultId), typeActif, chemin)
         } finally {
             setGeneration(false)

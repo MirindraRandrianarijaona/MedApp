@@ -128,8 +128,8 @@ const api = {
     supprimerLigne: (idLigne: number) => ipcRenderer.invoke('ordonnances:supprimerLigne', idLigne)
   },
   documents: {
-    ouvrirPDF: (base64: string, nomFichier: string) =>
-      ipcRenderer.invoke('documents:ouvrirPDF', base64, nomFichier),
+    ouvrirPDF: (base64: string, nomFichier: string, dossierPatient: string) =>
+      ipcRenderer.invoke('documents:ouvrirPDF', base64, nomFichier, dossierPatient),
     enregistrer: (idConsultation: number, typeDocument: string, cheminFichier: string) =>
       ipcRenderer.invoke('documents:enregistrer', idConsultation, typeDocument, cheminFichier)
   },
@@ -163,6 +163,11 @@ const api = {
   backup: {
     exporter: () => ipcRenderer.invoke('backup:exporter'),
     restaurer: () => ipcRenderer.invoke('backup:restaurer')
+  },
+  coffre: {
+    etat: () => ipcRenderer.invoke('coffre:etat'),
+    creer: (motDePasse: string) => ipcRenderer.invoke('coffre:creer', motDePasse),
+    deverrouiller: (motDePasse: string) => ipcRenderer.invoke('coffre:deverrouiller', motDePasse)
   }
 }
 

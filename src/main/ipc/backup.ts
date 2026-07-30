@@ -1,6 +1,6 @@
 import { app, dialog, ipcMain } from 'electron'
 import { copyFileSync } from 'fs'
-import { getDatabase, getDbPath, closeDatabase } from '../db'
+import { getDatabase, getDbPath, fermerBase } from '../db'
 
 export function registerBackupHandlers(): void {
   ipcMain.handle('backup:exporter', async () => {
@@ -26,7 +26,7 @@ export function registerBackupHandlers(): void {
     })
     if (canceled || filePaths.length === 0) return false
 
-    closeDatabase()
+    fermerBase()
     copyFileSync(filePaths[0], getDbPath())
     app.relaunch()
     app.exit()

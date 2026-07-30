@@ -238,7 +238,7 @@ interface API {
     supprimerLigne: (idLigne: number) => Promise<boolean>
   }
   documents: {
-    ouvrirPDF: (base64: string, nomFichier: string) => Promise<string>
+    ouvrirPDF: (base64: string, nomFichier: string, dossierPatient: string) => Promise<string>
     enregistrer: (
       idConsultation: number,
       typeDocument: string,
@@ -268,6 +268,11 @@ interface API {
   backup: {
     exporter: () => Promise<string | null>
     restaurer: () => Promise<boolean>
+  }
+  coffre: {
+    etat: () => Promise<{ existe: boolean }>
+    creer: (motDePasse: string) => Promise<boolean>
+    deverrouiller: (motDePasse: string) => Promise<boolean>
   }
 }
 

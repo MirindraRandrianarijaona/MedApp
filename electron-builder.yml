@@ -11,11 +11,15 @@ files:
   - "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}"
 asarUnpack:
   - resources/**
-  - "**/node_modules/better-sqlite3/**/*"
+  - "**/node_modules/better-sqlite3-multiple-ciphers/**/*"
   - "**/node_modules/argon2/**/*"
 win:
   executableName: medicapp
 nsis:
+  oneClick: false
+  perMachine: true
+  allowToChangeInstallationDirectory: true
+  allowElevation: true
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
