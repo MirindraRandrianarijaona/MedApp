@@ -1,7 +1,7 @@
 import { app, shell, ipcMain } from 'electron'
 import { join } from 'path'
 import { writeFileSync, existsSync, mkdirSync } from 'fs'
-import { getDatabase } from '../db'
+import { getDatabase } from '../db/db_index'
 
 function nettoyer(texte: string): string {
   return texte.replace(/[\\/:*?"<>|]/g, '_').trim()

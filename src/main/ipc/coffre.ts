@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron'
-import { baseExiste, ouvrirBase } from '../db'
+import { baseExiste, ouvrirBase } from '../db/db_index'
 
 export function registerCoffreHandlers(): void {
   ipcMain.handle('coffre:etat', () => ({ existe: baseExiste() }))

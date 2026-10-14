@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
 import * as argon2 from 'argon2'
-import { getDatabase } from '../db'
+import { getDatabase } from '../db/db_index'
 
 interface Medecin {
   id: number

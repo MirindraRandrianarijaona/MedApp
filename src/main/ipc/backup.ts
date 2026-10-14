@@ -1,6 +1,6 @@
 import { app, dialog, ipcMain } from 'electron'
 import { copyFileSync } from 'fs'
-import { getDatabase, getDbPath, fermerBase } from '../db'
+import { getDatabase, getDbPath, fermerBase } from '../db/db_index'
 
 export function registerBackupHandlers(): void {
   ipcMain.handle('backup:exporter', async () => {

@@ -15,15 +15,51 @@ interface LigneOrdonnance {
     dosageDisponible: string | null
 }
 
-const POSOLOGIES_COURANTES = [
-    '1 comprimé matin',
-    '1 comprimé matin et soir',
-    '1 comprimé 3 fois par jour',
-    '2 comprimés par jour',
-    '1 sachet par jour'
-]
 const MOMENTS_COURANTS = ['Avant les repas', 'Pendant les repas', 'Après les repas', 'Avant de dormir', 'Au réveil']
 const DUREES_COURANTES = ['3 jours', '5 jours', '7 jours', '10 jours', '1 mois']
+
+type CategoriePosologie = 'oral_solide' | 'sirop' | 'injection' | 'topique' | 'suppositoire' | 'gouttes'
+
+function categoriePosologie(forme: string | null): CategoriePosologie | null {
+    if (!forme) return null
+    const f = forme.toLowerCase()
+    // "sachet" d'abord, avant "poudre"/"suspension" en général : une poudre pour
+    // suspension EN SACHET se dose en sachets, une poudre pour suspension buvable
+    // (sans "sachet") se reconstitue en flacon et se dose en ml, comme un sirop.
+    if (f.includes('sachet')) return 'oral_solide'
+    if (f.includes('comprim') || f.includes('gélule') || f.includes('gelule')) return 'oral_solide'
+    if (f.includes('sirop') || f.includes('solution buvable') || f.includes('suspension')) return 'sirop'
+    if (f.includes('injectable') || f.includes('perfusion') || f.includes('ampoule')) return 'injection'
+    if (f.includes('crème') || f.includes('creme') || f.includes('pommade') || f.includes('gel')) return 'topique'
+    if (f.includes('suppositoire') || f.includes('ovule')) return 'suppositoire'
+    if (f.includes('collyre') || f.includes('goutte')) return 'gouttes'
+    return null
+}
+
+// Catégories où la grille matin/midi/soir a du sens (dose numérique par créneau)
+const CATEGORIES_AVEC_GRILLE: CategoriePosologie[] = ['oral_solide', 'sirop']
+
+// Pour oral_solide, l'unité réelle dépend du texte de la forme (comprimé, gélule
+// ou sachet) plutôt que d'être figée — sinon un sachet afficherait "comprimé".
+function uniteGrille(categorie: CategoriePosologie | null, forme: string | null): string | undefined {
+    if (categorie === 'sirop') return 'ml'
+    if (categorie === 'oral_solide') {
+        const f = (forme ?? '').toLowerCase()
+        if (f.includes('sachet')) return 'sachet'
+        if (f.includes('gélule') || f.includes('gelule')) return 'gélule'
+        return 'comprimé'
+    }
+    return undefined
+}
+
+// Pour les catégories hors grille : chips contextuels selon la forme réelle du médicament.
+// Rien n'est affiché si la forme n'est pas reconnue (mieux vaut aucune suggestion qu'une fausse).
+const POSOLOGIES_PAR_CATEGORIE: Partial<Record<CategoriePosologie, string[]>> = {
+    injection: ['1 ampoule IM par jour', '1 ampoule IV lente', '1 flacon en perfusion', '1 injection SC par jour'],
+    topique: ['Application locale 2 fois par jour', 'Application locale matin et soir', 'Fine couche 1 fois par jour'],
+    suppositoire: ['1 suppositoire matin et soir', '1 suppositoire le soir'],
+    gouttes: ['1 goutte dans chaque œil 3 fois par jour', '2 gouttes matin et soir']
+}
 
 export function OrdonnanceFormPage(): React.JSX.Element {
     const { id, consultId } = useParams()
@@ -33,10 +69,46 @@ export function OrdonnanceFormPage(): React.JSX.Element {
     const [lignes, setLignes] = useState<LigneOrdonnance[]>([])
     const [generation, setGeneration] = useState(false)
 
-    const [medicamentChoisi, setMedicamentChoisi] = useState<{ id: number; nomCommercial: string } | null>(null)
+    const [medicamentChoisi, setMedicamentChoisi] = useState<{ id: number; nomCommercial: string; forme: string | null } | null>(null)
     const [posologie, setPosologie] = useState('')
     const [momentPrise, setMomentPrise] = useState('')
     const [dureeTraitement, setDureeTraitement] = useState('')
+    const [modeTexteLibre, setModeTexteLibre] = useState(false)
+    const [grilleMatin, setGrilleMatin] = useState('')
+    const [grilleMidi, setGrilleMidi] = useState('')
+    const [grilleSoir, setGrilleSoir] = useState('')
+
+    const categorie = categoriePosologie(medicamentChoisi?.forme ?? null)
+    const grilleDisponible = categorie !== null && CATEGORIES_AVEC_GRILLE.includes(categorie)
+    const afficherGrille = grilleDisponible && !modeTexteLibre
+
+    // Nouveau médicament choisi : on repart sur le mode par défaut (grille si disponible) et on vide les champs.
+    useEffect(() => {
+        setModeTexteLibre(false)
+        setGrilleMatin('')
+        setGrilleMidi('')
+        setGrilleSoir('')
+        // Si la grille est le mode par défaut pour cette forme, on initialise posologie à "0-0-0"
+        // plutôt que vide, pour ne jamais soumettre une posologie blanche sans y toucher.
+        if (grilleDisponible) {
+            const unite = uniteGrille(categorie, medicamentChoisi?.forme ?? null)
+            setPosologie(`0-0-0 ${unite ?? ''} (matin-midi-soir)`.replace(/\s+/g, ' ').trim())
+        } else {
+            setPosologie('')
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [medicamentChoisi?.id])
+
+    function majGrille(matin: string, midi: string, soir: string): void {
+        setGrilleMatin(matin)
+        setGrilleMidi(midi)
+        setGrilleSoir(soir)
+        const unite = uniteGrille(categorie, medicamentChoisi?.forme ?? null)
+        const m = matin || '0'
+        const mi = midi || '0'
+        const s = soir || '0'
+        setPosologie(`${m}-${mi}-${s} ${unite ?? ''} (matin-midi-soir)`.replace(/\s+/g, ' ').trim())
+    }
     const [consultation, setConsultation] = useState<{ motif: string; diagnostic: string | null } | null>(null)
     const [notes, setNotes] = useState('')
 
@@ -194,10 +266,52 @@ export function OrdonnanceFormPage(): React.JSX.Element {
                 )}
 
                 <div>
-                    <input placeholder="Posologie (ex: 1 comprimé 3 fois par jour)" value={posologie}
-                        onChange={(e) => setPosologie(e.target.value)} required
-                        className="w-full border border-slate/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brass" />
-                    <QuickChips options={POSOLOGIES_COURANTES} onSelect={setPosologie} />
+                    {afficherGrille ? (
+                        <div className="space-y-1.5">
+                            <div className="grid grid-cols-3 gap-2">
+                                <div>
+                                    <label className="text-xs text-slate block mb-1">Matin</label>
+                                    <input type="number" min="0" placeholder="0" value={grilleMatin}
+                                        onChange={(e) => majGrille(e.target.value, grilleMidi, grilleSoir)}
+                                        className="w-full border border-slate/30 rounded-md px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-brass" />
+                                </div>
+                                <div>
+                                    <label className="text-xs text-slate block mb-1">Midi</label>
+                                    <input type="number" min="0" placeholder="0" value={grilleMidi}
+                                        onChange={(e) => majGrille(grilleMatin, e.target.value, grilleSoir)}
+                                        className="w-full border border-slate/30 rounded-md px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-brass" />
+                                </div>
+                                <div>
+                                    <label className="text-xs text-slate block mb-1">Soir</label>
+                                    <input type="number" min="0" placeholder="0" value={grilleSoir}
+                                        onChange={(e) => majGrille(grilleMatin, grilleMidi, e.target.value)}
+                                        className="w-full border border-slate/30 rounded-md px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-brass" />
+                                </div>
+                            </div>
+                            {uniteGrille(categorie, medicamentChoisi?.forme ?? null) && (
+                                <p className="text-xs text-slate">Unité : {uniteGrille(categorie, medicamentChoisi?.forme ?? null)}</p>
+                            )}
+                            <button type="button" onClick={() => { setModeTexteLibre(true); setPosologie('') }}
+                                className="text-xs text-brass hover:underline">
+                                Passer en texte libre
+                            </button>
+                        </div>
+                    ) : (
+                        <div>
+                            <input placeholder="Posologie" value={posologie}
+                                onChange={(e) => setPosologie(e.target.value)} required
+                                className="w-full border border-slate/30 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brass" />
+                            {categorie && POSOLOGIES_PAR_CATEGORIE[categorie] && (
+                                <QuickChips options={POSOLOGIES_PAR_CATEGORIE[categorie]!} onSelect={setPosologie} />
+                            )}
+                            {grilleDisponible && (
+                                <button type="button" onClick={() => { setModeTexteLibre(false); setPosologie('') }}
+                                    className="text-xs text-brass hover:underline mt-1.5 block">
+                                    Revenir à la grille rapide
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">

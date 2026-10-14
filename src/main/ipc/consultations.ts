@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron'
-import { getDatabase } from '../db'
+import { getDatabase } from '../db/db_index'
 
 interface ParametresInput {
   poids?: number

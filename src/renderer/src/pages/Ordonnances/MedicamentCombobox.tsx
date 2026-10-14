@@ -4,8 +4,24 @@ interface Medicament {
     id: number
     nomCommercial: string
     nomGenerique: string | null
+    forme: string | null
     dosageDisponible: string | null
 }
+
+const FORMES_COURANTES = [
+    'Comprimé',
+    'Gélule',
+    'Sachet',
+    'Sirop',
+    'Solution buvable',
+    'Solution injectable',
+    'Poudre pour solution injectable',
+    'Pommade',
+    'Crème',
+    'Suppositoire',
+    'Collyre',
+    'Spray'
+]
 
 export function MedicamentCombobox({
     onSelect
@@ -16,7 +32,8 @@ export function MedicamentCombobox({
     const [resultats, setResultats] = useState<Medicament[]>([])
     const [ouvert, setOuvert] = useState(false)
     const [creationOuverte, setCreationOuverte] = useState(false)
-    const [forme, setForme] = useState('')
+    const [formeSelect, setFormeSelect] = useState('')
+    const [formeAutre, setFormeAutre] = useState('')
     const [dosage, setDosage] = useState('')
     const ref = useRef<HTMLDivElement>(null)
 
@@ -46,16 +63,23 @@ export function MedicamentCombobox({
         setOuvert(false)
     }
 
+    function reinitialiserCreation(): void {
+        setCreationOuverte(false)
+        setFormeSelect('')
+        setFormeAutre('')
+        setDosage('')
+    }
+
     async function creerEtChoisir(): Promise<void> {
+        const forme = formeSelect === 'Autre' ? formeAutre : formeSelect
+
         const m = await window.api.medicaments.creerRapide({
-            nomCommercial: query,
+            nomCommercial: query.toUpperCase(),
             forme: forme || undefined,
             dosageDisponible: dosage || undefined
         })
         choisir(m)
-        setCreationOuverte(false)
-        setForme('')
-        setDosage('')
+        reinitialiserCreation()
     }
 
     return (
@@ -89,13 +113,33 @@ export function MedicamentCombobox({
                             onClick={() => setCreationOuverte(true)}
                             className="w-full text-left px-3 py-2 text-sm text-brass font-medium hover:bg-brass/10"
                         >
-                            + Ajouter "{query}" comme nouveau médicament
+                            + Ajouter "{query.toUpperCase()}" comme nouveau médicament
                         </button>
                     ) : (
                         <div className="p-3 space-y-2 bg-paper">
-                            <p className="text-xs text-slate">Nouveau médicament : <strong>{query}</strong></p>
-                            <input placeholder="Forme (ex: Comprimé)" value={forme} onChange={(e) => setForme(e.target.value)}
-                                className="w-full border border-slate/30 rounded-md px-2 py-1.5 text-sm" />
+                            <p className="text-xs text-slate">Nouveau médicament : <strong>{query.toUpperCase()}</strong></p>
+
+                            <select
+                                value={formeSelect}
+                                onChange={(e) => setFormeSelect(e.target.value)}
+                                className="w-full border border-slate/30 rounded-md px-2 py-1.5 text-sm bg-white"
+                            >
+                                <option value="">Forme…</option>
+                                {FORMES_COURANTES.map((f) => (
+                                    <option key={f} value={f}>{f}</option>
+                                ))}
+                                <option value="Autre">Autre (préciser)</option>
+                            </select>
+
+                            {formeSelect === 'Autre' && (
+                                <input
+                                    placeholder="Préciser la forme"
+                                    value={formeAutre}
+                                    onChange={(e) => setFormeAutre(e.target.value)}
+                                    className="w-full border border-slate/30 rounded-md px-2 py-1.5 text-sm"
+                                />
+                            )}
+
                             <input placeholder="Dosage (ex: 500mg)" value={dosage} onChange={(e) => setDosage(e.target.value)}
                                 className="w-full border border-slate/30 rounded-md px-2 py-1.5 text-sm" />
                             <button type="button" onClick={creerEtChoisir}

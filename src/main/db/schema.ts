@@ -58,6 +58,7 @@ CREATE INDEX IF NOT EXISTS idx_complement_consultation ON complementConsultation
 
 CREATE TABLE IF NOT EXISTS medicament (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  codeProduit TEXT UNIQUE,
   nomCommercial TEXT NOT NULL,
   nomGenerique TEXT,
   forme TEXT,
@@ -65,6 +66,11 @@ CREATE TABLE IF NOT EXISTS medicament (
   classeTherapeutique TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_medicament_nom ON medicament(nomCommercial);
+
+CREATE TABLE IF NOT EXISTS metadonnee (
+  cle TEXT PRIMARY KEY,
+  valeur TEXT
+);
 
 
 CREATE TABLE IF NOT EXISTS ligneOrdonnance (

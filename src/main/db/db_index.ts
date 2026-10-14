@@ -3,9 +3,12 @@ import { app } from 'electron'
 import { join } from 'path'
 import { existsSync } from 'fs'
 import { SCHEMA } from './schema'
+import { MEDICAMENTS_SEED } from './medicamentsSeed'
 
 let db: InstanceType<typeof Database> | null = null
 let cheminDb = ''
+
+const CLE_SEED_MEDICAMENTS = 'medicamentsImportesV1'
 
 export function getDbPath(): string {
   if (!cheminDb) cheminDb = join(app.getPath('userData'), 'medicapp.db')
@@ -14,6 +17,23 @@ export function getDbPath(): string {
 
 export function baseExiste(): boolean {
   return existsSync(getDbPath())
+}
+
+function importerMedicamentsSiNecessaire(instance: InstanceType<typeof Database>): void {
+  const dejaImporte = instance
+    .prepare('SELECT valeur FROM metadonnee WHERE cle = ?')
+    .get(CLE_SEED_MEDICAMENTS)
+
+  if (dejaImporte) return
+
+  const importer = instance.transaction(() => {
+    instance.exec(MEDICAMENTS_SEED)
+    instance
+      .prepare('INSERT OR REPLACE INTO metadonnee (cle, valeur) VALUES (?, ?)')
+      .run(CLE_SEED_MEDICAMENTS, new Date().toISOString())
+  })
+
+  importer()
 }
 
 export function ouvrirBase(motDePasse: string): boolean {
@@ -32,6 +52,7 @@ export function ouvrirBase(motDePasse: string): boolean {
   instance.pragma('journal_mode = WAL')
   instance.pragma('foreign_keys = ON')
   instance.exec(SCHEMA)
+  importerMedicamentsSiNecessaire(instance)
   db = instance
   return true
 }
